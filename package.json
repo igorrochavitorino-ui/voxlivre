@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "desktop": "electron electron-main.js"
   },
   "keywords": [],
   "author": "",
@@ -16,5 +17,8 @@
     "msedge-tts": "^2.0.7",
     "multer": "^2.3.0",
     "pdf-parse": "^2.4.5"
+  },
+  "devDependencies": {
+    "electron": "^44.2.0"
   }
 }

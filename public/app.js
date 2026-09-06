@@ -1308,3 +1308,45 @@ function handleKeyboardShortcuts(e) {
     }
   }
 }
+
+// --------------------------------------------------------------------------
+// Suporte a PWA & Instalação Nativa no PC / Android
+// --------------------------------------------------------------------------
+let deferredInstallPrompt = null;
+const btnInstallApp = document.getElementById('btnInstallApp');
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.warn('Registro do Service Worker falhou:', err);
+    });
+  });
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if (btnInstallApp) {
+    btnInstallApp.style.display = 'inline-flex';
+  }
+});
+
+if (btnInstallApp) {
+  btnInstallApp.addEventListener('click', async () => {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      const { outcome } = await deferredInstallPrompt.userChoice;
+      if (outcome === 'accepted') {
+        btnInstallApp.style.display = 'none';
+      }
+      deferredInstallPrompt = null;
+    } else {
+      alert('Para instalar no celular Android: toque no menu (⋮) do Chrome e selecione "Instalar aplicativo" ou "Adicionar à tela inicial".\n\nNo PC: clique no ícone de instalar aplicativo na barra de endereços do Chrome ou Edge.');
+    }
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  if (btnInstallApp) btnInstallApp.style.display = 'none';
+  deferredInstallPrompt = null;
+});

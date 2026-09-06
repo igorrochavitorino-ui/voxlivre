@@ -3,6 +3,7 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const crypto = require('crypto');
 const { MsEdgeTTS, OUTPUT_FORMAT } = require('msedge-tts');
 const { PDFParse } = require('pdf-parse');
@@ -480,9 +481,26 @@ app.get('/api/audiobook/status/:jobId', (req, res) => {
 });
 
 // Inicialização do Servidor
-app.listen(PORT, () => {
+function getLocalIpAddresses() {
+  const interfaces = os.networkInterfaces();
+  const addresses = [];
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        addresses.push(iface.address);
+      }
+    }
+  }
+  return addresses;
+}
+
+app.listen(PORT, '0.0.0.0', () => {
+  const ips = getLocalIpAddresses();
   console.log(`====================================================`);
-  console.log(`🔊 VoxLivre - Leitor de PDF com Voz Humana Neural`);
-  console.log(`🌐 Servidor rodando em: http://localhost:${PORT}`);
+  console.log(`🔊 VoxLivre - Leitor Neural de PDF & Audiolivro`);
+  console.log(`💻 No PC (Navegador/Desktop):  http://localhost:${PORT}`);
+  ips.forEach(ip => {
+    console.log(`📱 No Celular Android (mesmo Wi-Fi): http://${ip}:${PORT}`);
+  });
   console.log(`====================================================`);
 });
