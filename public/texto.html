@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoxLivre - Leitor de Texto Copiado com Voz Humana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+
+  <!-- Header Superior -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          <path d="M12 7v14"></path>
+        </svg>
+      </div>
+      <div>
+        <h1 class="logo-title">Vox<span>Livre</span></h1>
+        <p class="logo-tagline">Voz Humana Neural • Texto Copiado</p>
+      </div>
+    </div>
+
+    <!-- Navegador de Abas / Páginas -->
+    <nav class="header-nav-tabs">
+      <a href="/" class="nav-tab-pill">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+        Leitor de PDF
+      </a>
+      <a href="/texto" class="nav-tab-pill active">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+        Texto Copiado
+      </a>
+    </nav>
+
+    <!-- Controles Centrais de Voz -->
+    <div class="header-controls">
+      <div class="control-group">
+        <label for="voiceSelect">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+          Voz:
+        </label>
+        <select id="voiceSelect" class="styled-select">
+          <option value="pt-BR-FranciscaNeural" selected>🇧🇷 Francisca (Feminina - Suave)</option>
+          <option value="pt-BR-AntonioNeural">🇧🇷 Antonio (Masculino - Narrador)</option>
+          <option value="pt-BR-ThalitaMultilingualNeural">🇧🇷 Thalita (Feminina - Multilíngue)</option>
+          <option value="pt-PT-RaquelNeural">🇵🇹 Raquel (Portugal - Feminina)</option>
+          <option value="pt-PT-DuarteNeural">🇵🇹 Duarte (Portugal - Masculino)</option>
+          <option value="en-US-JennyNeural">🇺🇸 Jenny (Inglês US)</option>
+          <option value="en-US-GuyNeural">🇺🇸 Guy (Inglês US)</option>
+          <option value="es-ES-ElviraNeural">🇪🇸 Elvira (Espanhol)</option>
+          <option value="es-ES-AlvaroNeural">🇪🇸 Alvaro (Espanhol)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="speedSelect">Velocidade:</label>
+        <select id="speedSelect" class="styled-select">
+          <option value="-25%">0.75x</option>
+          <option value="+0%" selected>1.0x</option>
+          <option value="+15%">1.15x</option>
+          <option value="+25%">1.25x</option>
+          <option value="+50%">1.5x</option>
+          <option value="+75%">1.75x</option>
+          <option value="+100%">2.0x</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="pitchSelect">Tom:</label>
+        <select id="pitchSelect" class="styled-select">
+          <option value="-10Hz">Grave</option>
+          <option value="+0Hz" selected>Padrão</option>
+          <option value="+10Hz">Agudo</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Botões Direita -->
+    <div class="header-right">
+      <button id="btnExportModal" class="btn btn-secondary" style="display: none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Baixar MP3
+      </button>
+      <button id="btnEditNewText" class="btn btn-primary" style="display: none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+        Editar Texto
+      </button>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="main-content">
+
+    <!-- Área de Colar Texto -->
+    <section id="inputSection" class="paste-container">
+      <div class="paste-card">
+        <div class="paste-card-header">
+          <div>
+            <h2 class="paste-title">Leitor de Texto Copiado</h2>
+            <p class="paste-subtitle">Cole notícias da web, resumos, artigos, livros ou mensagens para ouvir com voz humana real</p>
+          </div>
+          <div class="paste-header-actions">
+            <button id="btnPasteClipboard" class="btn btn-secondary-sm">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+              </svg>
+              Colar Copiado (Ctrl+V)
+            </button>
+            <button id="btnClearText" class="btn btn-secondary-sm">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              Limpar
+            </button>
+          </div>
+        </div>
+
+        <div class="textarea-wrapper">
+          <textarea id="rawTextInput" placeholder="Cole ou digite seu texto aqui... O VoxLivre cuidará da divisão em parágrafos e narrará com voz humana sem pausas e sem limites."></textarea>
+        </div>
+
+        <div class="paste-card-footer">
+          <div class="text-stats-pill">
+            <span id="labelWordCount">0 palavras</span>
+            <span class="bullet">•</span>
+            <span id="labelCharCount">0 caracteres</span>
+            <span class="bullet">•</span>
+            <span id="labelReadingEstimate">~0 min de áudio</span>
+          </div>
+
+          <button id="btnStartReading" class="btn btn-primary btn-large">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            Iniciar Leitura com Voz Humana
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Área de Exibição do Texto Sendo Narrado -->
+    <section id="readerSection" class="reader-container" style="display: none;">
+      
+      <div class="reader-toolbar">
+        <div class="doc-info">
+          <span class="doc-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.3);">TEXTO</span>
+          <div class="doc-text">
+            <h3 id="docTitle" class="doc-title">Texto Copiado</h3>
+            <p id="docStats" class="doc-stats">0 palavras • ~0 min de áudio</p>
+          </div>
+        </div>
+
+        <div class="reader-toolbar-actions">
+          <button id="btnBackToEdit" class="btn btn-secondary-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Editar Texto
+          </button>
+        </div>
+      </div>
+
+      <div id="textDisplay" class="text-content-card">
+        <!-- Parágrafos interativos inseridos aqui -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Player de Áudio Flutuante Fixo no Rodapé -->
+  <footer id="playerBar" class="player-bar" style="display: none;">
+    <div class="player-content">
+      
+      <div class="player-current-info">
+        <div class="player-pulse-icon" id="playerPulse">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="player-text">
+          <div id="playerStatusLabel" class="player-status">Pronto para ler</div>
+          <div id="playerSnippet" class="player-snippet">Selecione um parágrafo ou clique no Play</div>
+        </div>
+      </div>
+
+      <div class="player-center-controls">
+        <div class="button-row">
+          <button id="btnPlayerPrev" class="player-btn control-btn" title="Parágrafo Anterior">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="19 20 9 12 19 4 19 20"></polygon>
+              <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2.5"></line>
+            </svg>
+          </button>
+
+          <button id="btnPlayerPlay" class="player-btn play-btn" title="Iniciar Leitura">
+            <svg id="playIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <svg id="pauseIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+          </button>
+
+          <button id="btnPlayerStop" class="player-btn control-btn" title="Parar Leitura">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+            </svg>
+          </button>
+
+          <button id="btnPlayerNext" class="player-btn control-btn" title="Próximo Parágrafo">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 4 15 12 5 20 5 4"></polygon>
+              <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="player-progress-container">
+          <span id="playerCurrentTime" class="time-label">0:00</span>
+          <div class="progress-bar-bg" id="progressBarBg">
+            <div id="progressBarFill" class="progress-bar-fill"></div>
+          </div>
+          <span id="playerTotalTime" class="time-label">0:00</span>
+        </div>
+      </div>
+
+      <div class="player-right-actions">
+        <label class="auto-advance-label" title="Passar para o próximo parágrafo automaticamente">
+          <input type="checkbox" id="chkAutoAdvance" checked>
+          <span>Avanço Contínuo</span>
+        </label>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Modal para Gerar e Baixar MP3 -->
+  <div id="exportModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </div>
+        <div>
+          <h2 class="modal-title">Exportar Áudio em MP3</h2>
+          <p class="modal-subtitle">Gere um arquivo de áudio de alta fidelidade para ouvir onde quiser</p>
+        </div>
+        <button id="btnCloseModal" class="btn-close">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <div id="exportProgressBox" class="export-progress-box" style="display: none;">
+          <div class="progress-status-row">
+            <span id="exportStatusText">Sintetizando áudio neural com voz humana...</span>
+            <strong id="exportPercentText">0%</strong>
+          </div>
+          <div class="modal-progress-bar">
+            <div id="exportProgressBarFill" class="modal-progress-fill"></div>
+          </div>
+          <p id="exportDetailText" class="progress-detail">Processando blocos de áudio...</p>
+        </div>
+
+        <div id="exportDownloadBox" class="export-download-box" style="display: none;">
+          <div class="success-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <h3>Áudio Gerado com Sucesso!</h3>
+          <p>O arquivo MP3 com voz humana cristalina está pronto para download.</p>
+          <a id="btnDownloadMp3" href="#" download class="btn btn-primary btn-large">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Baixar Arquivo MP3 Agora
+          </a>
+        </div>
+
+      </div>
+
+      <div class="modal-footer" id="modalFooter">
+        <button id="btnCancelExport" class="btn btn-secondary">Cancelar</button>
+        <button id="btnStartExport" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Gerar Arquivo MP3
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="texto.js"></script>
+</body>
+</html>
