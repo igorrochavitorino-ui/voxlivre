@@ -48,6 +48,22 @@
     <!-- Controles Centrais de Voz -->
     <div class="header-controls">
       <div class="control-group">
+        <label for="narratorModeSelect">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+          </svg>
+          Modo:
+        </label>
+        <select id="narratorModeSelect" class="styled-select">
+          <option value="aula" selected>🎓 Professor (Aula Didática)</option>
+          <option value="livro">📖 Contador de Histórias (Audiolivro)</option>
+          <option value="conversa">💬 Conversa Natural (1.0x)</option>
+          <option value="rapido">⚡ Revisão Dinâmica (1.15x)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
         <label for="voiceSelect">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
@@ -58,9 +74,9 @@
           Voz:
         </label>
         <select id="voiceSelect" class="styled-select">
-          <option value="pt-BR-FranciscaNeural" selected>🇧🇷 Francisca (Feminina - Suave)</option>
-          <option value="pt-BR-AntonioNeural">🇧🇷 Antonio (Masculino - Narrador)</option>
-          <option value="pt-BR-ThalitaMultilingualNeural">🇧🇷 Thalita (Feminina - Multilíngue)</option>
+          <option value="pt-BR-AntonioNeural" selected>🇧🇷 Antonio (Professor &amp; Audiolivro)</option>
+          <option value="pt-BR-FranciscaNeural">🇧🇷 Francisca (Suave &amp; Literatura)</option>
+          <option value="pt-BR-ThalitaMultilingualNeural">🇧🇷 Thalita (Contemporânea &amp; Didática)</option>
           <option value="pt-PT-RaquelNeural">🇵🇹 Raquel (Portugal - Feminina)</option>
           <option value="pt-PT-DuarteNeural">🇵🇹 Duarte (Portugal - Masculino)</option>
           <option value="en-US-JennyNeural">🇺🇸 Jenny (Inglês US)</option>
@@ -73,22 +89,26 @@
       <div class="control-group">
         <label for="speedSelect">Velocidade:</label>
         <select id="speedSelect" class="styled-select">
-          <option value="-25%">0.75x</option>
-          <option value="+0%" selected>1.0x</option>
-          <option value="+15%">1.15x</option>
-          <option value="+25%">1.25x</option>
-          <option value="+50%">1.5x</option>
-          <option value="+75%">1.75x</option>
-          <option value="+100%">2.0x</option>
+          <option value="-20%">0.80x (Muito Calmo)</option>
+          <option value="-15%">0.85x (Pausado &amp; Aula)</option>
+          <option value="-10%" selected>0.90x (Explicativo / Professor)</option>
+          <option value="-5%">0.95x (Leitura de Livro)</option>
+          <option value="+0%">1.0x (Normal)</option>
+          <option value="+15%">1.15x (Fluido)</option>
+          <option value="+25%">1.25x (Rápido)</option>
+          <option value="+50%">1.5x (Acelerado)</option>
+          <option value="+75%">1.75x (Super Rápido)</option>
+          <option value="+100%">2.0x (Máximo)</option>
         </select>
       </div>
 
       <div class="control-group">
         <label for="pitchSelect">Tom:</label>
         <select id="pitchSelect" class="styled-select">
-          <option value="-10Hz">Grave</option>
-          <option value="+0Hz" selected>Padrão</option>
-          <option value="+10Hz">Agudo</option>
+          <option value="-4Hz">Grave &amp; Encorpado</option>
+          <option value="-2Hz" selected>Caloroso (Didático)</option>
+          <option value="+0Hz">Padrão</option>
+          <option value="+4Hz">Mais Agudo</option>
         </select>
       </div>
     </div>

@@ -8,6 +8,8 @@ const state = {
   currentBoundaries: [],
   lastHighlightedIdx: -1,
   animFrameId: null,
+  narratorMode: 'aula',
+  paragraphTransitionTimeout: null,
   isPlaying: false,
   isPaused: false,
   autoAdvance: true,
@@ -35,6 +37,7 @@ const docTitle = document.getElementById('docTitle');
 const docStats = document.getElementById('docStats');
 const textDisplay = document.getElementById('textDisplay');
 
+const narratorModeSelect = document.getElementById('narratorModeSelect');
 const voiceSelect = document.getElementById('voiceSelect');
 const speedSelect = document.getElementById('speedSelect');
 const pitchSelect = document.getElementById('pitchSelect');
@@ -73,6 +76,12 @@ const modalFooter = document.getElementById('modalFooter');
 // Inicialização e Preferências
 // --------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', () => {
+  const savedMode = localStorage.getItem('voxlivre_narrator_mode');
+  if (savedMode && narratorModeSelect && narratorModeSelect.querySelector(`option[value="${savedMode}"]`)) {
+    narratorModeSelect.value = savedMode;
+    state.narratorMode = savedMode;
+  }
+
   const savedVoice = localStorage.getItem('vozlivre_voice');
   const savedSpeed = localStorage.getItem('vozlivre_speed');
   const savedPitch = localStorage.getItem('vozlivre_pitch');
@@ -90,6 +99,46 @@ window.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', handleKeyboardShortcuts);
   updateStats();
 });
+
+function applyNarratorMode(mode, userInitiated = true) {
+  state.narratorMode = mode;
+  localStorage.setItem('voxlivre_narrator_mode', mode);
+
+  if (userInitiated) {
+    if (mode === 'aula') {
+      speedSelect.value = '-10%'; // 0.90x
+      pitchSelect.value = '-2Hz'; // Caloroso
+      if (voiceSelect.querySelector('option[value="pt-BR-AntonioNeural"]')) {
+        voiceSelect.value = 'pt-BR-AntonioNeural';
+      }
+    } else if (mode === 'livro') {
+      speedSelect.value = '-5%'; // 0.95x
+      pitchSelect.value = '+0Hz';
+      if (voiceSelect.querySelector('option[value="pt-BR-FranciscaNeural"]')) {
+        voiceSelect.value = 'pt-BR-FranciscaNeural';
+      }
+    } else if (mode === 'conversa') {
+      speedSelect.value = '+0%'; // 1.0x
+      pitchSelect.value = '+0Hz';
+    } else if (mode === 'rapido') {
+      speedSelect.value = '+15%'; // 1.15x
+      pitchSelect.value = '+0Hz';
+    }
+
+    localStorage.setItem('vozlivre_speed', speedSelect.value);
+    localStorage.setItem('vozlivre_pitch', pitchSelect.value);
+    localStorage.setItem('vozlivre_voice', voiceSelect.value);
+
+    state.audioCache.clear();
+    if (state.isPlaying) restartCurrent();
+  }
+}
+
+if (narratorModeSelect) {
+  narratorModeSelect.addEventListener('change', () => {
+    applyNarratorMode(narratorModeSelect.value, true);
+  });
+}
 
 voiceSelect.addEventListener('change', () => {
   localStorage.setItem('vozlivre_voice', voiceSelect.value);
@@ -391,7 +440,20 @@ function onEnded() {
   clearWordHighlight();
   const nextIdx = state.currentIndex + 1;
   if (nextIdx < state.paragraphs.length) {
-    startReading(nextIdx);
+    let pauseMs = 500;
+    if (state.narratorMode === 'aula') pauseMs = 550;
+    else if (state.narratorMode === 'livro') pauseMs = 450;
+    else if (state.narratorMode === 'conversa') pauseMs = 350;
+    else if (state.narratorMode === 'rapido') pauseMs = 200;
+
+    playerStatusLabel.textContent = `Pausa didática (${(pauseMs / 1000).toFixed(1)}s)...`;
+
+    if (state.paragraphTransitionTimeout) clearTimeout(state.paragraphTransitionTimeout);
+    state.paragraphTransitionTimeout = setTimeout(() => {
+      if (state.isPlaying) {
+        startReading(nextIdx);
+      }
+    }, pauseMs);
   } else {
     stopPlayback();
     playerStatusLabel.textContent = 'Leitura Concluída';
@@ -400,6 +462,10 @@ function onEnded() {
 }
 
 function stopAudioOnly() {
+  if (state.paragraphTransitionTimeout) {
+    clearTimeout(state.paragraphTransitionTimeout);
+    state.paragraphTransitionTimeout = null;
+  }
   clearWordHighlight();
   if (state.currentAudio) {
     state.currentAudio.pause();

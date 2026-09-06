@@ -40,25 +40,25 @@ const audiobookJobs = new Map();
 // Vozes recomendadas e completas
 const FEATURED_VOICES = [
   {
-    id: 'pt-BR-FranciscaNeural',
-    name: 'Francisca (Brasil - Feminina)',
-    description: 'Voz ultra-natural, expressiva e suave, ideal para livros e narrativas.',
-    lang: 'pt-BR',
-    gender: 'Female',
-    featured: true
-  },
-  {
     id: 'pt-BR-AntonioNeural',
-    name: 'Antonio (Brasil - Masculino)',
-    description: 'Voz encorpada, clara e profissional, estilo locutor e audiolivro.',
+    name: 'Antonio (Brasil - Professor & Audiolivro)',
+    description: 'Voz masculina encorpada, didática e calorosa, perfeita para aulas explicativas e grandes livros.',
     lang: 'pt-BR',
     gender: 'Male',
     featured: true
   },
   {
+    id: 'pt-BR-FranciscaNeural',
+    name: 'Francisca (Brasil - Suave & Narrativa)',
+    description: 'Voz ultra-natural, expressiva e suave, ideal para livros, romances e literatura.',
+    lang: 'pt-BR',
+    gender: 'Female',
+    featured: true
+  },
+  {
     id: 'pt-BR-ThalitaMultilingualNeural',
-    name: 'Thalita (Brasil - Multilíngue)',
-    description: 'Voz neural contemporânea e dinâmica.',
+    name: 'Thalita (Brasil - Contemporânea & Didática)',
+    description: 'Voz neural contemporânea e dinâmica, excelente para artigos e tecnologia.',
     lang: 'pt-BR',
     gender: 'Female',
     featured: true
@@ -113,7 +113,7 @@ const FEATURED_VOICES = [
   }
 ];
 
-// Função para limpar e normalizar o texto extraído de PDF
+// Função para limpar, normalizar e humanizar o texto extraído de PDF para leitura didática/audiolivro
 function cleanPdfText(rawText) {
   if (!rawText) return '';
 
@@ -121,9 +121,29 @@ function cleanPdfText(rawText) {
     // Remove caracteres nulos e de controle estranhos
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
     // Corrige hifenização de quebra de linha: "desenvolvi-\nmento" -> "desenvolvimento"
-    .replace(/(\b\w+)-\r?\n(\w+\b)/g, '$1$2')
-    // Substitui quebras de linha simples por espaço (mantendo o fluxo das frases)
-    .replace(/([^\n])\r?\n([^\n])/g, '$1 $2')
+    .replace(/(\b\w+)-\r?\n(\w+\b)/g, '$1$2');
+
+  // Detecta títulos e cabeçalhos colados em novas linhas (ex: "Módulo 2 Subsistemas...\nExaminar...")
+  // e insere pontuação para que a voz neural module a conclusão do título antes da explicação
+  text = text.replace(/(^|\n)(Módulo\s+\d+|Capítulo\s+\d+|Seção\s+\d+|Parte\s+\d+|Tópico\s+\d+|Unidade\s+\d+|Introdução|Conclusão|Resumo|Exercícios|Objetivos)([^\n.:?!]+)(\r?\n)([^\n])/gi, '$1$2$3.\n$5');
+
+  // Substitui quebras de linha simples por espaço (mantendo o fluxo das frases)
+  text = text.replace(/([^\n])\r?\n([^\n])/g, '$1 $2');
+
+  // Expande abreviações comuns de apostilas/livros para uma fala natural e didática
+  text = text
+    .replace(/\bex\.?:?\s+/gi, 'por exemplo, ')
+    .replace(/\bobs\.?:?\s+/gi, 'observação: ')
+    .replace(/\bpág\.?\s*(\d+)/gi, 'página $1')
+    .replace(/\bcap\.?\s*(\d+)/gi, 'capítulo $1')
+    .replace(/\bfig\.?\s*(\d+)/gi, 'figura $1')
+    .replace(/\bref\.?:?\s+/gi, 'referência: ')
+    .replace(/\bdept\.?\b/gi, 'departamento')
+    .replace(/\bprof\.?\s+/gi, 'professor ')
+    .replace(/\bdr\.?\s+/gi, 'doutor ')
+    .replace(/\betc\.\s*/gi, 'etcétera. ')
+    // Marcadores de lista: substitui símbolos soltos (•, ▪, ►) por pausa suave de travessão
+    .replace(/[•▪►]\s*/g, '— ')
     // Normaliza múltiplos espaços
     .replace(/[ \t]+/g, ' ')
     // Normaliza quebras de parágrafo duplas

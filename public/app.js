@@ -21,6 +21,8 @@ const state = {
   pdfCurrentPageWords: [],   // Tokens de palavras na folha do PDF atual: [{ el, text, clean, spanIdx }]
   pdfParagraphWordMap: [],   // Mapeamento [pIdx][wIdx] -> índice em pdfCurrentPageWords
   lastPdfWordEl: null,       // Elemento da palavra ativa na folha do PDF
+  narratorMode: 'aula',      // 'aula' (professor) | 'livro' (audiolivro) | 'conversa' | 'rapido'
+  paragraphTransitionTimeout: null,
   isPlaying: false,
   isPaused: false,
   autoAdvance: true,
@@ -65,6 +67,7 @@ const zoomLevelLabel = document.getElementById('zoomLevelLabel');
 const splitResizer = document.getElementById('splitResizer');
 const pdfCanvasWrapper = document.getElementById('pdfCanvasWrapper');
 
+const narratorModeSelect = document.getElementById('narratorModeSelect');
 const voiceSelect = document.getElementById('voiceSelect');
 const speedSelect = document.getElementById('speedSelect');
 const pitchSelect = document.getElementById('pitchSelect');
@@ -104,8 +107,13 @@ const modalFooter = document.getElementById('modalFooter');
 
 // --------------------------------------------------------------------------
 // Inicialização e Preferências
-// --------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', () => {
+  const savedMode = localStorage.getItem('voxlivre_narrator_mode');
+  if (savedMode && narratorModeSelect && narratorModeSelect.querySelector(`option[value="${savedMode}"]`)) {
+    narratorModeSelect.value = savedMode;
+    state.narratorMode = savedMode;
+  }
+
   const savedVoice = localStorage.getItem('vozlivre_voice');
   const savedSpeed = localStorage.getItem('vozlivre_speed');
   const savedPitch = localStorage.getItem('vozlivre_pitch');
@@ -132,6 +140,48 @@ window.addEventListener('DOMContentLoaded', () => {
   initSplitResizer();
   document.addEventListener('keydown', handleKeyboardShortcuts);
 });
+
+function applyNarratorMode(mode, userInitiated = true) {
+  state.narratorMode = mode;
+  localStorage.setItem('voxlivre_narrator_mode', mode);
+
+  if (userInitiated) {
+    if (mode === 'aula') {
+      // Professor (Aula Didática): cadência pausada, tom acolhedor e voz masculina encorpada
+      speedSelect.value = '-10%'; // 0.90x
+      pitchSelect.value = '-2Hz'; // Caloroso
+      if (voiceSelect.querySelector('option[value="pt-BR-AntonioNeural"]')) {
+        voiceSelect.value = 'pt-BR-AntonioNeural';
+      }
+    } else if (mode === 'livro') {
+      // Contador de Histórias (Audiolivro): expressivo, literatura, voz feminina fluida
+      speedSelect.value = '-5%'; // 0.95x
+      pitchSelect.value = '+0Hz';
+      if (voiceSelect.querySelector('option[value="pt-BR-FranciscaNeural"]')) {
+        voiceSelect.value = 'pt-BR-FranciscaNeural';
+      }
+    } else if (mode === 'conversa') {
+      speedSelect.value = '+0%'; // 1.0x
+      pitchSelect.value = '+0Hz';
+    } else if (mode === 'rapido') {
+      speedSelect.value = '+15%'; // 1.15x
+      pitchSelect.value = '+0Hz';
+    }
+
+    localStorage.setItem('vozlivre_speed', speedSelect.value);
+    localStorage.setItem('vozlivre_pitch', pitchSelect.value);
+    localStorage.setItem('vozlivre_voice', voiceSelect.value);
+
+    state.audioCache.clear();
+    if (state.isPlaying) restartCurrentParagraph();
+  }
+}
+
+if (narratorModeSelect) {
+  narratorModeSelect.addEventListener('change', () => {
+    applyNarratorMode(narratorModeSelect.value, true);
+  });
+}
 
 voiceSelect.addEventListener('change', () => {
   localStorage.setItem('vozlivre_voice', voiceSelect.value);
@@ -919,11 +969,31 @@ function onParagraphEnded() {
   const nextIdx = state.currentParagraphIndex + 1;
 
   if (nextIdx < page.paragraphs.length) {
-    startReadingParagraph(nextIdx);
+    // Pausa respiratória didática (simula um professor ou narrador respirando entre frases/tópicos)
+    let pauseMs = 500;
+    if (state.narratorMode === 'aula') pauseMs = 550;
+    else if (state.narratorMode === 'livro') pauseMs = 450;
+    else if (state.narratorMode === 'conversa') pauseMs = 350;
+    else if (state.narratorMode === 'rapido') pauseMs = 200;
+
+    playerStatusLabel.textContent = `Pausa didática (${(pauseMs / 1000).toFixed(1)}s)...`;
+
+    if (state.paragraphTransitionTimeout) clearTimeout(state.paragraphTransitionTimeout);
+    state.paragraphTransitionTimeout = setTimeout(() => {
+      if (state.isPlaying) {
+        startReadingParagraph(nextIdx);
+      }
+    }, pauseMs);
   } else {
-    // Fim da página: avança automaticamente para a próxima folha
+    // Fim da página: avança automaticamente para a próxima folha com pausa natural
     if (state.autoAdvance && state.currentPageIndex < state.doc.totalPages - 1) {
-      changePage(state.currentPageIndex + 1, true);
+      playerStatusLabel.textContent = 'Avançando folha do PDF...';
+      if (state.paragraphTransitionTimeout) clearTimeout(state.paragraphTransitionTimeout);
+      state.paragraphTransitionTimeout = setTimeout(() => {
+        if (state.isPlaying) {
+          changePage(state.currentPageIndex + 1, true);
+        }
+      }, 750);
     } else {
       stopPlayback();
       playerStatusLabel.textContent = 'Leitura Concluída';
@@ -950,6 +1020,10 @@ function clearWordHighlight() {
 }
 
 function stopAudioOnly() {
+  if (state.paragraphTransitionTimeout) {
+    clearTimeout(state.paragraphTransitionTimeout);
+    state.paragraphTransitionTimeout = null;
+  }
   clearWordHighlight();
   if (state.currentAudio) {
     state.currentAudio.pause();
