@@ -686,6 +686,14 @@ function handleKeyboardShortcuts(e) {
 // --------------------------------------------------------------------------
 let deferredInstallPrompt = null;
 const btnInstallApp = document.getElementById('btnInstallApp');
+const installModal = document.getElementById('installModal');
+const btnCloseInstallModal = document.getElementById('btnCloseInstallModal');
+const btnGotItInstall = document.getElementById('btnGotItInstall');
+
+// Oculta botão de instalação se já estiver rodando instalado (standalone)
+if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+  if (btnInstallApp) btnInstallApp.style.display = 'none';
+}
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -698,10 +706,15 @@ if ('serviceWorker' in navigator) {
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  if (btnInstallApp) {
-    btnInstallApp.style.display = 'inline-flex';
-  }
 });
+
+function openInstallModal() {
+  if (installModal) installModal.style.display = 'flex';
+}
+
+function closeInstallModal() {
+  if (installModal) installModal.style.display = 'none';
+}
 
 if (btnInstallApp) {
   btnInstallApp.addEventListener('click', async () => {
@@ -713,8 +726,16 @@ if (btnInstallApp) {
       }
       deferredInstallPrompt = null;
     } else {
-      alert('Para instalar no celular Android: toque no menu (⋮) do Chrome e selecione "Instalar aplicativo" ou "Adicionar à tela inicial".\n\nNo PC: clique no ícone de instalar aplicativo na barra de endereços do Chrome ou Edge.');
+      openInstallModal();
     }
+  });
+}
+
+if (btnCloseInstallModal) btnCloseInstallModal.addEventListener('click', closeInstallModal);
+if (btnGotItInstall) btnGotItInstall.addEventListener('click', closeInstallModal);
+if (installModal) {
+  installModal.addEventListener('click', (e) => {
+    if (e.target === installModal) closeInstallModal();
   });
 }
 
